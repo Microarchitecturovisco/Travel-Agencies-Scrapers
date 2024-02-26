@@ -1,8 +1,13 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+
+class Offer:
+
+    def __init__(self, link):
+        self.link = link
 
 
 def init_webdriver():
@@ -15,20 +20,24 @@ def init_webdriver():
 
 
 def scrape_all_inclusive_offers():
-    website_link = "https://www.itaka.pl/all-inclusive/"
-    driver.get(website_link)
+    pages_to_check = 2
+    offers = []
+    for pg in range(1, pages_to_check + 1):
+        website_link = "https://www.itaka.pl/all-inclusive/?page=" + str(pg)
+        driver.get(website_link)
 
-    load_whole_page(driver)  # scroll to the end of page
+        load_whole_page(driver)  # scroll to the end of page
 
+        # find all offers on the page
+        offers_on_website = driver.find_elements(By.CLASS_NAME, "styles_c--secondary__93kD2")[1:-1]
 
-    # "/html/body/div[5]/div[2]/div[6]/div[2]/div[1]/div/div[2]/div[2]/header/span[1]/span[2]/h5/a"
-    # "/html/body/div[5]/div[2]/div[6]/div[26]/div[1]/div/div[2]/div[2]/header/span[1]/span[2]/h5/a"
+        # save all offers
+        for offer in offers_on_website:
+            offer_web_link = offer.get_attribute('href')
+            new_offer = Offer(offer_web_link)
+            offers.append(new_offer)
 
-    # for i in range(2, 27):
-    #     link_element_xpath = "/html/body/div[5]/div[2]/div[6]/div[" + str(i) + "]/div[1]/div/div[2]/div[2]/header/span[1]/span[2]/h5/a"
-    #     link_element = driver.find_element(By.XPATH, link_element_xpath)
-    #     link = link_element.get_attribute("href")
-    #     print("Link:", link)
+    return offers
 
 
 def accept_cookies_button(driver):
@@ -36,32 +45,25 @@ def accept_cookies_button(driver):
     button = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, "/html/body/div[3]/div/div/div/div[2]/button[3]")))
 
-    # Click the button
+    # Click the "Accept cookies" button
     button.click()
 
 
 def load_whole_page(driver):
-    # Scroll gradually to the end of page in 10 steps
-    for i in range(10):
-        driver.execute_script("window.scrollTo(0, " + str(i) + " * document.body.scrollHeight / 10 );")
-        driver.implicitly_wait(1)
+    # Scroll gradually to the end of page in several steps
+    steps = 10
+    wait_for_sec = 0.1
+    for i in range(steps):
+        driver.execute_script("window.scrollTo(0, " + str(i) + " * document.body.scrollHeight / " + str(steps) + " );")
+        # driver.implicitly_wait(wait_for_sec)
 
 
 if __name__ == "__main__":
-
     driver = init_webdriver()
 
     accept_cookies_button(driver)
 
     all_inclusive_offers = scrape_all_inclusive_offers()
 
-    # Find all the article titles on the homepage
-    article_titles = driver.find_elements(By.XPATH, "//h2[@class='article-title']")
-
-    # Iterate over the article titles and print them
-    for title in article_titles:
-        print(title.text)
-
     # Close the browser
     driver.quit()
-
