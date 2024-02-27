@@ -8,7 +8,7 @@ if __name__ == "__main__":
     offers_list = scrape_all_inclusive_offers(driver)
 
     for offer in offers_list:
-        scrape_single_offer(offer)
+        scrape_single_offer(driver, offer)
 
     # Close the browser
     driver.quit()
