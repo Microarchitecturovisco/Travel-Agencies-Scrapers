@@ -1,14 +1,14 @@
 from initalize_scraper import init_webdriver
-from scrape_links_to_offers import scrape_all_inclusive_offers
-from scrape_single_offer import scrape_single_tour
+from scrapping_links_to_tours import scrape_all_inclusive_tours
+from scrapping_single_tour import scrape_single_tour
 
 if __name__ == "__main__":
     driver = init_webdriver()
 
-    offers_list = scrape_all_inclusive_offers(driver)
+    tours_list = scrape_all_inclusive_tours(driver)
 
-    for offer in offers_list:
-        scrape_single_tour(driver, offer)
+    for tour in tours_list:
+        scrape_single_tour(driver, tour)
 
     # Close the browser
     driver.quit()

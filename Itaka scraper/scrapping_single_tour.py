@@ -1,17 +1,21 @@
+from selenium.common import NoSuchElementException
 from selenium.webdriver.common.by import By
 from initalize_scraper import init_webdriver
 from tour_class import Tour
 
 
 def scrape_element_by_xpath(driver, element_xpath):
-    element = driver.find_element(By.XPATH, element_xpath)
-    element_value = element.text
-    return element_value
+    try:
+        element = driver.find_element(By.XPATH, element_xpath)
+        element_value = element.text
+        return element_value
+    except NoSuchElementException:
+        return None
 
 
 def get_tour_name(driver):
-    name_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[2]/div[3]/span/span[2]/span[1]/span[2]"
-    name = scrape_element_by_xpath(driver, name_xpath)
+    element = driver.find_element(By.CLASS_NAME, "styles_c--with-spaces__KUJpZ")
+    name = element.text
     return name
 
 
@@ -28,18 +32,14 @@ def get_tour_city(driver):
 
 
 def get_tour_food_options(driver):
-    food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[13]/div/section/span"
-    element = driver.find_element(By.XPATH, food_options_xpath)
-
+    # food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[13]/div/section/span"
+    food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
+    button_element = driver.find_element(By.XPATH, food_options_xpath)
     # Finding all the list items (food options)
-    food_options_element = element.find_elements(By.CLASS_NAME, "styles_c__features--expanded__9hNlD")
+    # Get the text from the button element    food_options_element = element.find_elements(By.CLASS_NAME, "styles_c__features--expanded__9hNlD")
+    button_text = button_element.text
+    food_options = button_text.split("\n")[1:]
 
-    food_options = []
-    # Looping through each food option to extract its name and price
-    for option in food_options_element:
-        # Extracting the name of the food option
-        name = option.find_element(By.CLASS_NAME, "styles_c__children__MR8TP").text
-        food_options.append(name)
     return food_options
 
 
@@ -68,27 +68,28 @@ def get_tour_photos(driver):
     return image_urls
 
 
-def get_restaurant_details(driver):
-    details_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[13]/div/section/span/span[2]/div/div[1]"
-    restaurant_details = scrape_element_by_xpath(driver, details_xpath)
-    return restaurant_details
-
-
 def get_airport_options(driver):
     # Click the button to see airport options - list of airports
     button_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[5]/button"
     button_element = driver.find_element(By.XPATH, button_xpath)
-    button_element.click()
+    airport_cities = ""
+    if button_element.is_enabled():
+        button_element.click()
+        driver.implicitly_wait(2)
 
-    # select the dropdown list element
-    airport_opt_xpath = "/html/body/div[6]/div/div/div/div[1]"
-    airport_opt_element = driver.find_element(By.XPATH, airport_opt_xpath)
+        # select the dropdown list element
+        airport_opt_xpath = "/html/body/div[6]/div/div/div/div[1]"
+        airport_opt_element = driver.find_element(By.XPATH, airport_opt_xpath)
 
-    airport_cities = get_default_airport_option(airport_opt_element)
+        airport_cities = get_default_airport_options(airport_opt_element)
 
-    get_additional_airport_options(airport_cities, airport_opt_element)
+        get_additional_airport_options(airport_cities, airport_opt_element)
 
-    airport_cities = [value.split('\n')[0] for value in airport_cities]  # extract name only
+        airport_cities = [value.split('\n')[0] for value in airport_cities]  # extract name only
+
+    else:
+        button_value = button_element.text
+        airport_cities = button_value.split("\n")[1:]
 
     return airport_cities
 
@@ -96,7 +97,7 @@ def get_airport_options(driver):
 def get_additional_airport_options(airport_cities, airport_opt_element):
     # Get values from the second longer list
     additional_airport_opt_elements = airport_opt_element.find_elements(By.XPATH,
-                                                                            "./div/ul/li[@class='styles_c__h83a9']")
+                                                                        "./div/ul/li[@class='styles_c__h83a9']")
     for element in additional_airport_opt_elements:
         # Extracting the airport information
         label_element = element.find_element(By.CLASS_NAME, "styles_c__label__q3Tzc")
@@ -107,34 +108,45 @@ def get_additional_airport_options(airport_cities, airport_opt_element):
         airport_cities.append(airport_city)
 
 
-def get_default_airport_option(airport_opt_element):
+def get_default_airport_options(airport_opt_element):
     airport_cities = []
-    # Get value from the first list
-    default_airport_opt_element = airport_opt_element.find_element(By.XPATH,
-                                                                       "./ul/li[@class='styles_c__h83a9 styles_c--selected___BJ9a']")
-    default_airport_opt = default_airport_opt_element.find_element(By.CLASS_NAME, "oui-font-size-14").text
-    airport_cities.append(default_airport_opt)
+    # Find all li elements within the ul
+    li_elements = airport_opt_element.find_elements(By.XPATH, "./ul/li")
+    # Iterate over each li element to extract city names
+    for li_element in li_elements:
+        city_name = li_element.find_element(By.XPATH, ".//span[contains(@class, 'oui-font-size-14')]").text
+        airport_cities.append(city_name)
+
     return airport_cities
 
 
 def scrape_single_tour(driver, tour):
+    print("tour link:")
     driver.get(tour.link)
-    driver.implicitly_wait(1)
+    print(tour.link)
+    driver.implicitly_wait(2)
 
     tour.name = get_tour_name(driver)
     tour.country = get_tour_country(driver)
-    tour.city = get_tour_city(driver)
-    tour.restaurant_details = get_restaurant_details(driver)
+    tour.city = get_tour_city(driver) or tour.country
+    # tour.restaurant_details = get_restaurant_details(driver)
     tour.food_options = get_tour_food_options(driver)
+    print(tour.food_options)
+
     tour.photos = get_tour_photos(driver)
     tour.airport_options = get_airport_options(driver)
-
+    print(tour.airport_options)
+    print("tour scrapped successfully\n")
     return tour
 
 
 if __name__ == "__main__":
     driver = init_webdriver()
     test_tour_link = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
+    # test_tour_link = "https://www.itaka.pl/wczasy/egipt/marsa-alam/hotel-casa-mare-resort-(ex.-royal-tulip-beach-resort),RMFTULR.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdSTUZUVUxSKAQ6BEwwNTlCBgiA2ImvBkoGCIDNrq8GUAJiBQoDUE9aagUKA1JNRnIDCgExegUKA1JNRoIBBQoDUE9aigEDCgExkgEGCIDYia8GmgEGCIDNrq8GogEFCgNESFOqAQMKAUE%253D"
+    # test_tour_link = "https://www.itaka.pl/wczasy/tunezja/djerba/hotel-royal-karthago-djerba,DJEKART.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdESkVLQVJUKAQ6BEwwNTdCBgiAkv%252BuBkoGCICHpK8GUAJiBQoDS1RXagUKA0RKRXIDCgExegUKA0RKRYIBBQoDS1RXigEDCgExkgEGCICS%252F64GmgEGCICHpK8GogEFCgNEQkyqAQMKAUE%253D"
+    # test_tour_link = "https://www.itaka.pl/wczasy/turcja/side/hotel-euphoria-barbaross-beach-resort,AYTEUPB.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdBWVRFVVBCKAQ6BFA0MTBCBgiAx%252FWxBkoGCID2j7IGUAJiBQoDV1JPagUKA0FZVHIDCgE3egUKA0FZVIIBBQoDV1JPigEDCgExkgEGCIDH9bEGmgEGCID2j7IGogEFCgNEQkyqAQMKAUE%253D"
+    # test_tour_link = "https://www.itaka.pl/wczasy/albania/durres/hotel-royal-g-lux,TIAROLU.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdUSUFST0xVKAQ6BFA0MDBCBgiAs7OzBkoGCIDizbMGUAJiBQoDV0FXagUKA1RJQXIDCgEyegUKA1RJQYIBBQoDV0FXigEDCgExkgEGCICzs7MGmgEGCIDizbMGogEFCgNEQkyqAQMKAUE%253D"
     test_tour = Tour(test_tour_link)
     test_tour = scrape_single_tour(driver, test_tour)
 

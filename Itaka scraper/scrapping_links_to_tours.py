@@ -2,8 +2,8 @@ from selenium.webdriver.common.by import By
 from tour_class import Tour
 
 
-def scrape_all_inclusive_offers(driver):
-    pages_to_check = 2
+def scrape_all_inclusive_tours(driver):
+    pages_to_check = 1
     tours = []
     for pg in range(1, pages_to_check + 1):
         website_link = "https://www.itaka.pl/all-inclusive/?page=" + str(pg)
@@ -17,7 +17,7 @@ def scrape_all_inclusive_offers(driver):
         # save all tours
         for tour in tours_on_website:
             tour_web_link = tour.get_attribute('href')
-            new_tour = tour(tour_web_link)
+            new_tour = Tour(tour_web_link)
             tours.append(new_tour)
 
     return tours
@@ -25,7 +25,7 @@ def scrape_all_inclusive_offers(driver):
 
 def load_whole_page(driver):
     # Scroll gradually to the end of page in several steps
-    steps = 5
+    steps = 3
     wait_for_sec = 0.1
     for i in range(steps):
         driver.execute_script("window.scrollTo(0, " + str(i) + " * document.body.scrollHeight / " + str(steps) + " );")
