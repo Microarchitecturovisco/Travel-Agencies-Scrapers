@@ -73,57 +73,57 @@ def get_tour_city(driver: WebDriver) -> Optional[str]:
     return city
 
 
-def get_tour_food_options(driver: WebDriver) -> List[str]:
+def get_tour_catering_options(driver: WebDriver) -> List[str]:
     """
-    Get the food options available for the tour from the webpage.
+    Get the catering options available for the tour from the webpage.
 
     If there is more than one option to choose, the button is clickable (enabled)
-    and food options are listed in a dropdown list.
+    and catering options are listed in a dropdown list.
 
     Parameters:
     - driver (WebDriver): The WebDriver object.
 
     Returns:
-    - List[str]: A list of food options available for the tour.
+    - List[str]: A list of catering options available for the tour.
     """
-    food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
-    button_element = driver.find_element(By.XPATH, food_options_xpath)
+    catering_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
+    button_element = driver.find_element(By.XPATH, catering_options_xpath)
 
     if button_element.is_enabled():  # more than one option available - open dropdown list
         button_element.click()  # open dropdown list
         driver.implicitly_wait(2)
 
-        food_options = get_food_options_from_dropdown_list(driver)
+        catering_options = get_catering_options_from_dropdown_list(driver)
 
         button_element.click()  # close dropdown list
 
-        return food_options
+        return catering_options
 
     else:  # only one option available
         button_text = button_element.text
-        food_options = button_text.split("\n")[1:]
+        catering_options = button_text.split("\n")[1:]
 
-    return food_options
+    return catering_options
 
 
-def get_food_options_from_dropdown_list(driver: WebDriver):
+def get_catering_options_from_dropdown_list(driver: WebDriver):
     """
-    Extracts food options from the dropdown list on the Itaka website.
+    Extracts catering options from the dropdown list on the Itaka website.
 
     Parameters:
     - driver: The Selenium WebDriver instance.
 
     Returns:
-    - list: A list of food option names extracted from the dropdown list.
+    - list: A list of catering option names extracted from the dropdown list.
     """
-    # Find all elements within the food options list
-    food_opt_element = driver.find_elements(By.CLASS_NAME, "styles_c__h83a9")
-    food_options = []
-    # Iterate over each element to extract food option names
-    for element in food_opt_element:
-        food_opt_name = element.text.split("\n")[0]
-        food_options.append(food_opt_name)
-    return food_options
+    # Find all elements within the catering options list
+    catering_opt_element = driver.find_elements(By.CLASS_NAME, "styles_c__h83a9")
+    catering_options = []
+    # Iterate over each element to extract catering option names
+    for element in catering_opt_element:
+        catering_opt_name = element.text.split("\n")[0]
+        catering_options.append(catering_opt_name)
+    return catering_options
 
 
 def get_tour_photos(driver: WebDriver) -> List[str]:
@@ -258,7 +258,7 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     tour.city = get_tour_city(driver) or tour.country
     tour.photos = get_tour_photos(driver)
     tour.airport_options = get_airport_options(driver)
-    tour.food_options = get_tour_food_options(driver)
+    tour.catering_options = get_tour_catering_options(driver)
     print("tour scrapped successfully\n")
     return tour
 
