@@ -43,6 +43,31 @@ def get_tour_food_options(driver):
     return food_options
 
 
+def get_tour_photos(driver):
+    # XPath to locate the parent <ul> element containing the images
+    photos_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[1]/div/div[3]/div[4]/ul"
+    element = driver.find_element(By.XPATH, photos_xpath)
+
+    # Finding all <li> elements under the parent <ul> element
+    photo_items = element.find_elements(By.TAG_NAME, "li")
+
+    # List to store image URLs
+    image_urls = []
+
+    # Looping through each <li> element to extract the image URLs
+    for item in photo_items:
+        # Finding the <img> element within the <li> element
+        img_element = item.find_element(By.TAG_NAME, "img")
+
+        # Extracting the 'src' attribute of the <img> element (image URL)
+        image_url = img_element.get_attribute("src")
+
+        # Appending the image URL to the list
+        image_urls.append(image_url)
+
+    return image_urls
+
+
 def get_restaurant_details(driver):
     details_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[13]/div/section/span/span[2]/div/div[1]"
     restaurant_details = scrape_element_by_xpath(driver, details_xpath)
@@ -58,6 +83,7 @@ def scrape_single_tour(driver, tour):
     tour.city = get_tour_city(driver)
     tour.restaurant_details = get_restaurant_details(driver)
     tour.food_options = get_tour_food_options(driver)
+    tour.photos = get_tour_photos(driver)
 
     return tour
 
