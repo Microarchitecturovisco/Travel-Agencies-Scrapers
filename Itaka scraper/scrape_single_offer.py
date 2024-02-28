@@ -27,6 +27,28 @@ def get_tour_city(driver):
     return city
 
 
+def get_tour_food_options(driver):
+    food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[13]/div/section/span"
+    element = driver.find_element(By.XPATH, food_options_xpath)
+
+    # Finding all the list items (food options)
+    food_options_element = element.find_elements(By.CLASS_NAME, "styles_c__features--expanded__9hNlD")
+
+    food_options = []
+    # Looping through each food option to extract its name and price
+    for option in food_options_element:
+        # Extracting the name of the food option
+        name = option.find_element(By.CLASS_NAME, "styles_c__children__MR8TP").text
+        food_options.append(name)
+    return food_options
+
+
+def get_restaurant_details(driver):
+    details_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[13]/div/section/span/span[2]/div/div[1]"
+    restaurant_details = scrape_element_by_xpath(driver, details_xpath)
+    return restaurant_details
+
+
 def scrape_single_tour(driver, tour):
     driver.get(tour.link)
     driver.implicitly_wait(1)
@@ -34,6 +56,8 @@ def scrape_single_tour(driver, tour):
     tour.name = get_tour_name(driver)
     tour.country = get_tour_country(driver)
     tour.city = get_tour_city(driver)
+    tour.restaurant_details = get_restaurant_details(driver)
+    tour.food_options = get_tour_food_options(driver)
 
     return tour
 
