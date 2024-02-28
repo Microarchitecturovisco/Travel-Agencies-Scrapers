@@ -74,6 +74,49 @@ def get_restaurant_details(driver):
     return restaurant_details
 
 
+def get_airport_options(driver):
+    # Click the button to see airport options - list of airports
+    button_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[5]/button"
+    button_element = driver.find_element(By.XPATH, button_xpath)
+    button_element.click()
+
+    # select the dropdown list element
+    airport_opt_xpath = "/html/body/div[6]/div/div/div/div[1]"
+    airport_opt_element = driver.find_element(By.XPATH, airport_opt_xpath)
+
+    airport_cities = get_default_airport_option(airport_opt_element)
+
+    get_additional_airport_options(airport_cities, airport_opt_element)
+
+    airport_cities = [value.split('\n')[0] for value in airport_cities]  # extract name only
+
+    return airport_cities
+
+
+def get_additional_airport_options(airport_cities, airport_opt_element):
+    # Get values from the second longer list
+    additional_airport_opt_elements = airport_opt_element.find_elements(By.XPATH,
+                                                                            "./div/ul/li[@class='styles_c__h83a9']")
+    for element in additional_airport_opt_elements:
+        # Extracting the airport information
+        label_element = element.find_element(By.CLASS_NAME, "styles_c__label__q3Tzc")
+        # airport_info['city'] = label_element.find_element(By.CLASS_NAME, "oui-font-size-14").text
+        # airport_info['date_time'] = label_element.find_element(By.TAG_NAME, "div").text
+        # airport_info['price'] = element.find_element(By.CLASS_NAME, "text-nowrap").text
+        airport_city = label_element.find_element(By.CLASS_NAME, "oui-font-size-14").text
+        airport_cities.append(airport_city)
+
+
+def get_default_airport_option(airport_opt_element):
+    airport_cities = []
+    # Get value from the first list
+    default_airport_opt_element = airport_opt_element.find_element(By.XPATH,
+                                                                       "./ul/li[@class='styles_c__h83a9 styles_c--selected___BJ9a']")
+    default_airport_opt = default_airport_opt_element.find_element(By.CLASS_NAME, "oui-font-size-14").text
+    airport_cities.append(default_airport_opt)
+    return airport_cities
+
+
 def scrape_single_tour(driver, tour):
     driver.get(tour.link)
     driver.implicitly_wait(1)
@@ -84,6 +127,7 @@ def scrape_single_tour(driver, tour):
     tour.restaurant_details = get_restaurant_details(driver)
     tour.food_options = get_tour_food_options(driver)
     tour.photos = get_tour_photos(driver)
+    tour.airport_options = get_airport_options(driver)
 
     return tour
 
