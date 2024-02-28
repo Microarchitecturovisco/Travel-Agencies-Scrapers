@@ -32,13 +32,30 @@ def get_tour_city(driver):
 
 
 def get_tour_food_options(driver):
-    # food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[13]/div/section/span"
     food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
     button_element = driver.find_element(By.XPATH, food_options_xpath)
-    # Finding all the list items (food options)
-    # Get the text from the button element    food_options_element = element.find_elements(By.CLASS_NAME, "styles_c__features--expanded__9hNlD")
-    button_text = button_element.text
-    food_options = button_text.split("\n")[1:]
+
+    if button_element.is_enabled():
+        button_element.click()
+        driver.implicitly_wait(2)
+
+        # Find all elements within the food options list
+        food_opt_element = driver.find_elements(By.CLASS_NAME, "styles_c__h83a9")
+
+        food_options = []
+
+        # Iterate over each li element to extract food option names
+        for element in food_opt_element:
+            food_opt_name = element.text.split("\n")[0]
+            food_options.append(food_opt_name)
+
+        button_element.click()
+
+        return food_options
+
+    else:
+        button_text = button_element.text
+        food_options = button_text.split("\n")[1:]
 
     return food_options
 
@@ -87,6 +104,8 @@ def get_airport_options(driver):
 
         airport_cities = [value.split('\n')[0] for value in airport_cities]  # extract name only
 
+        button_element.click()
+
     else:
         button_value = button_element.text
         airport_cities = button_value.split("\n")[1:]
@@ -130,12 +149,9 @@ def scrape_single_tour(driver, tour):
     tour.country = get_tour_country(driver)
     tour.city = get_tour_city(driver) or tour.country
     # tour.restaurant_details = get_restaurant_details(driver)
-    tour.food_options = get_tour_food_options(driver)
-    print(tour.food_options)
-
     tour.photos = get_tour_photos(driver)
     tour.airport_options = get_airport_options(driver)
-    print(tour.airport_options)
+    tour.food_options = get_tour_food_options(driver)
     print("tour scrapped successfully\n")
     return tour
 
@@ -143,10 +159,6 @@ def scrape_single_tour(driver, tour):
 if __name__ == "__main__":
     driver = init_webdriver()
     test_tour_link = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
-    # test_tour_link = "https://www.itaka.pl/wczasy/egipt/marsa-alam/hotel-casa-mare-resort-(ex.-royal-tulip-beach-resort),RMFTULR.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdSTUZUVUxSKAQ6BEwwNTlCBgiA2ImvBkoGCIDNrq8GUAJiBQoDUE9aagUKA1JNRnIDCgExegUKA1JNRoIBBQoDUE9aigEDCgExkgEGCIDYia8GmgEGCIDNrq8GogEFCgNESFOqAQMKAUE%253D"
-    # test_tour_link = "https://www.itaka.pl/wczasy/tunezja/djerba/hotel-royal-karthago-djerba,DJEKART.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdESkVLQVJUKAQ6BEwwNTdCBgiAkv%252BuBkoGCICHpK8GUAJiBQoDS1RXagUKA0RKRXIDCgExegUKA0RKRYIBBQoDS1RXigEDCgExkgEGCICS%252F64GmgEGCICHpK8GogEFCgNEQkyqAQMKAUE%253D"
-    # test_tour_link = "https://www.itaka.pl/wczasy/turcja/side/hotel-euphoria-barbaross-beach-resort,AYTEUPB.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdBWVRFVVBCKAQ6BFA0MTBCBgiAx%252FWxBkoGCID2j7IGUAJiBQoDV1JPagUKA0FZVHIDCgE3egUKA0FZVIIBBQoDV1JPigEDCgExkgEGCIDH9bEGmgEGCID2j7IGogEFCgNEQkyqAQMKAUE%253D"
-    # test_tour_link = "https://www.itaka.pl/wczasy/albania/durres/hotel-royal-g-lux,TIAROLU.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdUSUFST0xVKAQ6BFA0MDBCBgiAs7OzBkoGCIDizbMGUAJiBQoDV0FXagUKA1RJQXIDCgEyegUKA1RJQYIBBQoDV0FXigEDCgExkgEGCICzs7MGmgEGCIDizbMGogEFCgNEQkyqAQMKAUE%253D"
     test_tour = Tour(test_tour_link)
     test_tour = scrape_single_tour(driver, test_tour)
 

@@ -3,7 +3,7 @@ from tour_class import Tour
 
 
 def scrape_all_inclusive_tours(driver):
-    pages_to_check = 1
+    pages_to_check = 4
     tours = []
     for pg in range(1, pages_to_check + 1):
         website_link = "https://www.itaka.pl/all-inclusive/?page=" + str(pg)
