@@ -31,16 +31,18 @@ def scrape_single_tour(driver, tour):
     driver.get(tour.link)
     driver.implicitly_wait(1)
 
-    name = get_tour_name(driver)
-    country = get_tour_country(driver)
-    city = get_tour_city(driver)
+    tour.name = get_tour_name(driver)
+    tour.country = get_tour_country(driver)
+    tour.city = get_tour_city(driver)
+
+    return tour
 
 
 if __name__ == "__main__":
     driver = init_webdriver()
     test_tour_link = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
     test_tour = Tour(test_tour_link)
-    scrape_single_tour(driver, test_tour)
+    test_tour = scrape_single_tour(driver, test_tour)
 
     # Close the browser
     driver.quit()
