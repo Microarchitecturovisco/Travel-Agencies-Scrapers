@@ -1,8 +1,9 @@
-from typing import List, Optional
+import time
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
+from typing import Optional, List
 from initalize_scraper import init_webdriver
 from tour_class import Tour
 
@@ -86,24 +87,28 @@ def get_tour_catering_options(driver: WebDriver) -> List[str]:
     Returns:
     - List[str]: A list of catering options available for the tour.
     """
-    catering_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
-    button_element = driver.find_element(By.XPATH, catering_options_xpath)
+    try:
+        catering_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
+        button_element = driver.find_element(By.XPATH, catering_options_xpath)
 
-    if button_element.is_enabled():  # more than one option available - open dropdown list
-        button_element.click()  # open dropdown list
-        driver.implicitly_wait(2)
+        if button_element.is_enabled():  # more than one option available - open dropdown list
+            button_element.click()  # open dropdown list
+            driver.implicitly_wait(2)
 
-        catering_options = get_catering_options_from_dropdown_list(driver)
+            catering_options = get_catering_options_from_dropdown_list(driver)
 
-        button_element.click()  # close dropdown list
+            button_element.click()  # close dropdown list
+
+            return catering_options
+
+        else:  # only one option available
+            button_text = button_element.text
+            catering_options = button_text.split("\n")[1:]
 
         return catering_options
-
-    else:  # only one option available
-        button_text = button_element.text
-        catering_options = button_text.split("\n")[1:]
-
-    return catering_options
+    except Exception as e:
+        print(f"An error occurred while getting tour catering options: {e}")
+        return []
 
 
 def get_catering_options_from_dropdown_list(driver: WebDriver):
@@ -116,14 +121,21 @@ def get_catering_options_from_dropdown_list(driver: WebDriver):
     Returns:
     - list: A list of catering option names extracted from the dropdown list.
     """
-    # Find all elements within the catering options list
-    catering_opt_element = driver.find_elements(By.CLASS_NAME, "styles_c__h83a9")
-    catering_options = []
-    # Iterate over each element to extract catering option names
-    for element in catering_opt_element:
-        catering_opt_name = element.text.split("\n")[0]
-        catering_options.append(catering_opt_name)
-    return catering_options
+    try:
+        # Find all elements within the catering options list
+        catering_opt_elements = driver.find_elements(By.CLASS_NAME, "styles_c__h83a9")
+        catering_options = []
+        # Iterate over each element to extract catering option names
+        for element in catering_opt_elements:
+            try:
+                catering_opt_name = element.text.split("\n")[0]
+                catering_options.append(catering_opt_name)
+            except Exception as e:
+                print(f"An error occurred while extracting catering option name: {e}")
+        return catering_options
+    except Exception as e:
+        print(f"An error occurred while getting catering options: {e}")
+        return []
 
 
 def get_tour_photos(driver: WebDriver) -> List[str]:
@@ -136,22 +148,29 @@ def get_tour_photos(driver: WebDriver) -> List[str]:
     Returns:
     - List[str]: A list of URLs of photos related to the tour.
     """
-    # XPath to locate the parent <ul> element containing the images
-    photos_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[1]/div/div[3]/div[4]/ul"
-    element = driver.find_element(By.XPATH, photos_xpath)
+    try:
+        # XPath to locate the parent <ul> element containing the images
+        photos_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[1]/div/div[3]/div[4]/ul"
+        element = driver.find_element(By.XPATH, photos_xpath)
 
-    photo_elements = element.find_elements(By.TAG_NAME, "li")
+        photo_elements = element.find_elements(By.TAG_NAME, "li")
 
-    image_urls = []
+        image_urls = []
 
-    # Looping through each <li> element to extract the image URLs
-    for element in photo_elements:
-        # Finding the <img> element within the <li> element
-        img_element = element.find_element(By.TAG_NAME, "img")
-        image_url = img_element.get_attribute("src")
-        image_urls.append(image_url)
+        # Looping through each <li> element to extract the image URLs
+        for element in photo_elements:
+            try:
+                # Finding the <img> element within the <li> element
+                img_element = element.find_element(By.TAG_NAME, "img")
+                image_url = img_element.get_attribute("src")
+                image_urls.append(image_url)
+            except Exception as e:
+                print(f"An error occurred while extracting image URL: {e}")
 
-    return image_urls
+        return image_urls
+    except Exception as e:
+        print(f"An error occurred while getting tour photos: {e}")
+        return []
 
 
 def get_airport_options(driver: WebDriver) -> List[str]:
@@ -167,38 +186,54 @@ def get_airport_options(driver: WebDriver) -> List[str]:
     Returns:
     - List[str]: A list of airport options available for the tour.
     """
+    try:
+        button_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[5]/button"
+        button_element = driver.find_element(By.XPATH, button_xpath)
 
-    button_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[5]/button"
-    button_element = driver.find_element(By.XPATH, button_xpath)
+        if button_element.is_enabled():  # more than one option available - open dropdown list
+            button_element.click()  # open dropdown list
+            time.sleep(1)
 
-    if button_element.is_enabled():  # more than one option available - open dropdown list
-        button_element.click()  # open dropdown list
-        driver.implicitly_wait(2)
+            airport_cities = get_airport_options_from_dropdown_list(driver)
 
-        airport_cities = get_airport_options_from_dropdown_list(driver)
+            button_element.click()  # close dropdown list
 
-        button_element.click()  # close dropdown list
+        else:  # only one option available
+            button_value = button_element.text
+            airport_cities = button_value.split("\n")[1:]
 
-    else:  # only one option available
-        button_value = button_element.text
-        airport_cities = button_value.split("\n")[1:]
-
-    return airport_cities
+        return airport_cities
+    except Exception as e:
+        print(f"An error occurred while getting airport options: {e}")
+        return []
 
 
 def get_airport_options_from_dropdown_list(driver):
-    # select the dropdown list element
-    airport_opt_xpath = "/html/body/div[6]/div/div/div/div[1]"
-    airport_opt_element = driver.find_element(By.XPATH, airport_opt_xpath)
-    airport_cities = get_default_airport_options(airport_opt_element)
-    get_additional_airport_options(airport_cities, airport_opt_element)
-    airport_cities = [value.split('\n')[0] for value in airport_cities]  # extract the city name
-    return airport_cities
+    """
+    Extracts airport options from the dropdown list.
+
+    Parameters:
+    - driver: WebDriver instance
+
+    Returns:
+    - List[str]: List of airport cities
+    """
+    try:
+        # Select the dropdown list element
+        airport_opt_xpath = "/html/body/div[6]/div/div/div/div[1]"
+        airport_opt_element = driver.find_element(By.XPATH, airport_opt_xpath)
+        airport_cities = get_default_airport_options(airport_opt_element)
+        get_additional_airport_options(airport_cities, airport_opt_element)
+        airport_cities = [value.split('\n')[0] for value in airport_cities]  # Extract the city name
+        return airport_cities
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return []
 
 
 def get_additional_airport_options(airport_cities: List[str], airport_opt_element: WebElement) -> None:
     """
-    Extract additional airport options from the given element and append them to the list of airport cities.
+    Extracts additional airport options from the given element and appends them to the list of airport cities.
 
     Parameters:
     - airport_cities (List[str]): The list of airport cities to which additional options will be appended.
@@ -207,13 +242,16 @@ def get_additional_airport_options(airport_cities: List[str], airport_opt_elemen
     Returns:
     - None
     """
-    additional_list_xpath = "./div/ul/li[@class='styles_c__h83a9']"
-    additional_airport_opt_elements = airport_opt_element.find_elements(By.XPATH, additional_list_xpath)
-    for element in additional_airport_opt_elements:
-        # Extracting the airport information
-        label_element = element.find_element(By.CLASS_NAME, "styles_c__label__q3Tzc")
-        airport_city = label_element.find_element(By.CLASS_NAME, "oui-font-size-14").text
-        airport_cities.append(airport_city)
+    try:
+        additional_list_xpath = "./div/ul/li[@class='styles_c__h83a9']"
+        additional_airport_opt_elements = airport_opt_element.find_elements(By.XPATH, additional_list_xpath)
+        for element in additional_airport_opt_elements:
+            # Extracting the airport information
+            label_element = element.find_element(By.CLASS_NAME, "styles_c__label__q3Tzc")
+            airport_city = label_element.find_element(By.CLASS_NAME, "oui-font-size-14").text
+            airport_cities.append(airport_city)
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 
 def get_default_airport_options(airport_opt_element: WebElement) -> List[str]:
@@ -250,12 +288,14 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     print("tour url:")
     driver.get(tour.url)
     print(tour.url)
-    driver.implicitly_wait(2)
+    driver.implicitly_wait(10)
+    time.sleep(3)  # wait for the page to load
 
-    # save tour details
     tour.name = get_tour_name(driver)
     tour.country = get_tour_country(driver)
-    tour.city = get_tour_city(driver) or tour.country
+    tour.city = get_tour_city(driver)
+    if tour.city is None:
+        tour.city = tour.country
     tour.photos = get_tour_photos(driver)
     tour.airport_options = get_airport_options(driver)
     tour.catering_options = get_tour_catering_options(driver)
@@ -265,7 +305,10 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
 
 if __name__ == "__main__":
     driver = init_webdriver()
-    test_tour_url = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
+    # test_tour_url = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
+    # test_tour_url = "https://www.itaka.pl/wczasy/kenia/twiga-beach-resort-and-spa,MBATWIG.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdNQkFUV0lHKAQ6BEwwNjBCBgiAqqmvBkoGCICfzq8GUAJiBQoDV1JPagUKA01CQXIDCgExegUKA01CQYIBBQoDV1JPigEDCgExkgEGCICqqa8GmgEGCICfzq8GogEFCgNMU1aqAQMKAUE%253D"
+    # test_tour_url = "https://www.itaka.pl/wczasy/tunezja/mahdia/hotel-thalassa-mahdia,NBETAMA.html"
+    test_tour_url = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants[0][adults]=2"
     test_tour = Tour(test_tour_url)
     test_tour = scrape_single_tour(driver, test_tour)
 
