@@ -5,6 +5,12 @@ from selenium.webdriver.support import expected_conditions as EC
 
 
 def init_webdriver():
+    """
+    Initialize a Chrome WebDriver and navigate to the website.
+
+    Returns:
+    - webdriver.Chrome: The initialized Chrome WebDriver.
+    """
     # Set up the Chrome webdriver (you need to have chromedriver installed)
     driver = webdriver.Chrome()
     # Navigate to the website
@@ -17,6 +23,12 @@ def init_webdriver():
 
 
 def accept_cookies_button(driver):
+    """
+    Clicks the "Accept cookies" button on the website.
+
+    Parameters:
+    - driver: The Selenium WebDriver instance.
+    """
     accept_cookies_button_xpath = "/html/body/div[3]/div/div/div/div[2]/button[3]"
     # Wait for the button to be clickable
     waiting_time = 10  # seconds
