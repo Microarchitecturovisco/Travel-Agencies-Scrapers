@@ -46,8 +46,15 @@ def scrape_destinations() -> Dict[AnyStr, List[AnyStr]]:
     return ret_destinations
 
 
-def save_dataframe(destinations: Dict[AnyStr, List[AnyStr]]):
+def save_dataframe(destinations: Dict[AnyStr, List[AnyStr]]) -> None:
+    """
+    Responsible for creating a Pandas dataframe from the scraped destinations and exporting it to a CSV file
 
+    Parameters
+    ----------
+    destinations: Dict[AnyStr, List[AnyStr]]
+        dictionary with countries along with their regions as lists
+    """
     flattened_destinations = []
     for country, regions_list in destinations.items():
         if not len(regions_list):
