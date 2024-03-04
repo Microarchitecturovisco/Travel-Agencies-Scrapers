@@ -1,7 +1,10 @@
+import pathlib
 from typing import Dict, List, AnyStr
 
+from tqdm.auto import tqdm
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+import pandas as pd
 
 from initalize_scraper import init_webdriver
 
@@ -23,11 +26,10 @@ def scrape_destinations() -> Dict[AnyStr, List[AnyStr]]:
 
     ret_destinations = {}
 
-    for destination in destinations_list_items:
+    for destination in tqdm(destinations_list_items):
         country_name = destination.find_element(By.CLASS_NAME, 'styles_c__label__sqHYM').text
 
         ret_destinations[country_name] = []
-        print(country_name)
 
         try:
             expand_regions_button = destination.find_element(By.CLASS_NAME, 'ms-2').find_element(By.TAG_NAME, 'button')
@@ -37,7 +39,6 @@ def scrape_destinations() -> Dict[AnyStr, List[AnyStr]]:
             regions = destination.find_elements(By.CLASS_NAME, 'styles_c__label__sqHYM')[1:]
 
             for region in regions:
-                print(f'    {region.text}')
                 ret_destinations[country_name].append(region.text)
         except NoSuchElementException:
             pass
@@ -45,9 +46,28 @@ def scrape_destinations() -> Dict[AnyStr, List[AnyStr]]:
     return ret_destinations
 
 
+def save_dataframe(destinations: Dict[AnyStr, List[AnyStr]]):
+
+    flattened_destinations = []
+    for country, regions_list in destinations.items():
+        if not len(regions_list):
+            flattened_destinations.append([country, ''])
+            continue
+
+        for region in regions_list:
+            flattened_destinations.append([country, region])
+
+    dataframe = pd.DataFrame(flattened_destinations, columns=["Country", "Region"])
+
+    print(f'\n{dataframe}')
+
+    pathlib.Path('./data').mkdir(parents=True, exist_ok=True)
+    dataframe.to_csv(pathlib.Path('./data/destinations.csv'), sep='\t')
+
+
 if __name__ == "__main__":
     driver = init_webdriver()
 
-    scrape_destinations()
+    save_dataframe(scrape_destinations())
 
     driver.quit()
