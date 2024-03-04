@@ -69,7 +69,7 @@ def save_dataframe(destinations: Dict[AnyStr, List[AnyStr]]) -> None:
     print(f'\n{dataframe}')
 
     pathlib.Path('./data').mkdir(parents=True, exist_ok=True)
-    dataframe.to_csv(pathlib.Path('./data/destinations.csv'), sep='\t')
+    dataframe.to_csv(pathlib.Path('./data/destinations.csv'), sep='\t', index=False)
 
 
 if __name__ == "__main__":
