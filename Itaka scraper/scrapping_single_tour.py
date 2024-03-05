@@ -44,6 +44,20 @@ def get_tour_name(driver: WebDriver) -> Optional[str]:
         return None
 
 
+def get_tour_rating(driver: WebDriver) -> Optional[str]:
+    rating_xpath = ("/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[2]/div[2]/span/span[2]/span[2]"
+                    "/span[2]/div[2]/div/span[2]/span[2]/div/div[1]/span/strong")
+    rating = scrape_element_by_xpath(driver, rating_xpath)
+    return rating
+
+
+def get_tour_description(driver: WebDriver) -> Optional[str]:
+    description_xpath = ("/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[1]/div[5]/div/section/span/span[2]"
+                         "/div/div/p/text()")
+    description = scrape_element_by_xpath(driver, description_xpath)
+    return description
+
+
 def get_tour_country(driver: WebDriver) -> Optional[str]:
     """
     Get the country of the tour from the webpage.
@@ -292,6 +306,8 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     time.sleep(3)  # wait for the page to load
 
     tour.name = get_tour_name(driver)
+    tour.rating = get_tour_rating(driver)
+    tour.description = get_tour_description(driver)
     tour.country = get_tour_country(driver)
     tour.city = get_tour_city(driver)
     if tour.city is None:
