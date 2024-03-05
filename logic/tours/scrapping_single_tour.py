@@ -4,7 +4,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from typing import Optional, List
-from initalize_scraper import init_webdriver
+from logic.initalize_scraper import init_webdriver
 from tour_class import Tour
 
 

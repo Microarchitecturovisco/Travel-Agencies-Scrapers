@@ -8,6 +8,14 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) to install librari
 pip install requirements.txt
 ```
 
+## Usage
+
+You can run the individual modules like so:
+
+```bash
+python -m logic.destinations.destination_scraping
+```
+
 ## Setting up a virtual environment
 
 If you want to create a virtual environment for python, run the following
