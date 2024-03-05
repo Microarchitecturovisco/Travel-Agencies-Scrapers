@@ -6,7 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 import pandas as pd
 
-from initalize_scraper import init_webdriver
+from logic.initalize_scraper import init_webdriver
 
 
 def scrape_destinations() -> Dict[AnyStr, List[AnyStr]]:
