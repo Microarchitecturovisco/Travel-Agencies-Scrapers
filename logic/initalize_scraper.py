@@ -4,15 +4,21 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 
-def init_webdriver():
+def init_webdriver(webdriver_type: str = 'chrome'):
     """
     Initialize a Chrome WebDriver and navigate to the website.
 
-    Returns:
-    - webdriver.Chrome: The initialized Chrome WebDriver.
+    Parameters
+    ----------
+    webdriver_type
+        Type of webdriver to use for scraping, either 'chrome' or 'firefox'
+
+    Returns
+    -------
+    The initialized WebDriver.
     """
-    # Set up the Chrome webdriver (you need to have chromedriver installed)
-    driver = webdriver.Chrome()
+    # Set up the webdriver (you need to have chromedriver or firefox installed)
+    driver = webdriver.Chrome() if webdriver_type == 'chrome' else webdriver.Firefox() if webdriver_type == 'firefox' else webdriver.Chrome()
     # Navigate to the website
     driver.get("https://www.itaka.pl/")
     driver.implicitly_wait(2)
