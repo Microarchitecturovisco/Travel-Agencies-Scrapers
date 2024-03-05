@@ -1,12 +1,14 @@
+import argparse
 import pathlib
 from typing import Dict, List, AnyStr
 
+from selenium import webdriver
 from tqdm.auto import tqdm
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 import pandas as pd
 
-from initalize_scraper import init_webdriver
+from logic.initalize_scraper import init_webdriver
 
 
 def scrape_destinations() -> Dict[AnyStr, List[AnyStr]]:
@@ -73,7 +75,11 @@ def save_dataframe(destinations: Dict[AnyStr, List[AnyStr]]) -> None:
 
 
 if __name__ == "__main__":
-    driver = init_webdriver()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--platform', help='Platform to use for the webdriver, either chrome or firefox')
+    args = parser.parse_args()
+
+    driver = init_webdriver(None if args.platform is None else args.platform.lower())
 
     save_dataframe(scrape_destinations())
 

@@ -1,6 +1,6 @@
-from initalize_scraper import init_webdriver
-from scrapping_tours_urls import scrape_all_inclusive_tours
-from scrapping_single_tour import scrape_single_tour
+from logic.initalize_scraper import init_webdriver
+from logic.tours.scrapping_tours_urls import scrape_all_inclusive_tours
+from logic.tours.scrapping_single_tour import scrape_single_tour
 
 if __name__ == "__main__":
     driver = init_webdriver()
