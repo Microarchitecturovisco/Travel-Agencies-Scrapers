@@ -1,3 +1,4 @@
+import re
 import time
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -5,7 +6,8 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from typing import Optional, List
 from logic.initalize_scraper import init_webdriver
-from tour_class import Tour
+from logic.tours.tour_class import Tour
+from logic.tours.room_class import Room
 
 
 def scrape_element_by_xpath(driver: WebDriver, element_xpath: str) -> Optional[str]:
@@ -173,6 +175,70 @@ def get_tour_photos(driver: WebDriver) -> List[str]:
         return []
 
 
+def get_room_options(driver: WebDriver):
+    rooms = []
+    person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']/button[2]")
+    person_button.click()
+    time.sleep(1)
+    sub_person_button = driver.find_element(By.XPATH, "//button[@class='styles_c__VNmM2 "
+                                                      "styles_c--secondary__oM3BG'][1]")
+    while sub_person_button.is_enabled():
+        sub_person_button.click()
+        time.sleep(1)
+
+    save_person_button = driver.find_element(By.XPATH, "//*[@class='ps-3 ms-auto']/button")
+    save_person_button.click()
+    room_capacity = 1
+    while True:
+        time.sleep(1)
+        try:
+            rooms_div = driver.find_element(By.NAME, "rooms")
+        except NoSuchElementException:
+            break
+
+        all_rooms = rooms_div.find_elements(By.CLASS_NAME, "col-md-6")
+        price_div = driver.find_element(By.XPATH, '//*[@data-testid="current-price"]/span[1]').text.strip()
+        standard_price = price_div.replace(" ", "").replace("zł", "")
+
+        for room in all_rooms:
+            new_room = Room()
+            room_name = room.find_element(By.TAG_NAME, "h4").text.strip()
+            room_button = room.find_element(By.XPATH, ".//ul/button")
+            room_button.click()
+            room_descriptions = room.find_elements(By.XPATH, ".//li/span/span[2]")
+            room_description = ',  '.join([description.text for description in room_descriptions])
+
+            price_div = room.find_element(By.XPATH, './/*[@class="styles_price__XJaTa styles_price--with-bottom-'
+                                                    'space__CFyLx"]/strong').text.strip()
+            room_price = 0
+            if price_div == "w cenie":
+                room_price = int(standard_price)
+            else:
+                additional_price = re.findall(r'\d+', price_div)
+                additional_price = ''.join(additional_price)
+                room_price = int(standard_price) + int(additional_price)
+
+            new_room.name = room_name
+            new_room.description = room_description
+            new_room.price = room_price
+            new_room.capacity = room_capacity
+            rooms.append(new_room)
+
+        driver.execute_script("window.scrollTo(0, 0);")
+        person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']/button[2]")
+        person_button.click()
+        time.sleep(1)
+        add_person_button = driver.find_element(By.XPATH, "//button[@class='styles_c__VNmM2 "
+                                                          "styles_c--secondary__oM3BG'][2]")
+        if not add_person_button.is_enabled():
+            break
+        add_person_button.click()
+        room_capacity += 1
+        save_person_button = driver.find_element(By.XPATH, "//*[@class='ps-3 ms-auto']/button")
+        save_person_button.click()
+    return rooms
+
+
 def get_airport_options(driver: WebDriver) -> List[str]:
     """
     Get the airport options available for the tour from the webpage.
@@ -290,7 +356,6 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     print(tour.url)
     driver.implicitly_wait(10)
     time.sleep(3)  # wait for the page to load
-
     tour.name = get_tour_name(driver)
     tour.country = get_tour_country(driver)
     tour.city = get_tour_city(driver)
@@ -299,6 +364,7 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     tour.photos = get_tour_photos(driver)
     tour.airport_options = get_airport_options(driver)
     tour.catering_options = get_tour_catering_options(driver)
+    rooms = get_room_options(driver)
     print("tour scrapped successfully\n")
     return tour
 
