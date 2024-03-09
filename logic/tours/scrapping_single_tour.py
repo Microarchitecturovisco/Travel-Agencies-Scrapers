@@ -175,7 +175,6 @@ def get_tour_photos(driver: WebDriver) -> List[str]:
         return []
 
 
-
 def get_room_options(driver: WebDriver):
     rooms = []
     person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']/button[2]")
@@ -238,7 +237,6 @@ def get_room_options(driver: WebDriver):
         save_person_button = driver.find_element(By.XPATH, "//*[@class='ps-3 ms-auto']/button")
         save_person_button.click()
     return rooms
-
 
 
 def get_airport_options(driver: WebDriver) -> List[str]:
@@ -358,7 +356,6 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     print(tour.url)
     driver.implicitly_wait(10)
     time.sleep(3)  # wait for the page to load
-
     tour.name = get_tour_name(driver)
     tour.country = get_tour_country(driver)
     tour.city = get_tour_city(driver)
