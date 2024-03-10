@@ -1,5 +1,5 @@
 from selenium.webdriver.common.by import By
-from tour_class import Tour
+from logic.tours.tour_class import Tour
 
 
 def scrape_all_inclusive_tours(driver):

@@ -177,7 +177,7 @@ def get_tour_photos(driver: WebDriver) -> List[str]:
 
 def get_room_options(driver: WebDriver):
     rooms = []
-    person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']/button[2]")
+    person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']/div[2]/button")
     person_button.click()
     time.sleep(1)
     sub_person_button = driver.find_element(By.XPATH, "//button[@class='styles_c__VNmM2 "
@@ -196,13 +196,13 @@ def get_room_options(driver: WebDriver):
         except NoSuchElementException:
             break
 
-        all_rooms = rooms_div.find_elements(By.CLASS_NAME, "col-md-6")
+        all_rooms = rooms_div.find_elements(By.CLASS_NAME, "styles_c__GHVYT")
         price_div = driver.find_element(By.XPATH, '//*[@data-testid="current-price"]/span[1]').text.strip()
         standard_price = price_div.replace(" ", "").replace("zł", "")
 
         for room in all_rooms:
             new_room = Room()
-            room_name = room.find_element(By.TAG_NAME, "h4").text.strip()
+            room_name = room.find_element(By.TAG_NAME, "h6").text.strip()
             room_button = room.find_element(By.XPATH, ".//ul/button")
             room_button.click()
             room_descriptions = room.find_elements(By.XPATH, ".//li/span/span[2]")
@@ -225,7 +225,8 @@ def get_room_options(driver: WebDriver):
             rooms.append(new_room)
 
         driver.execute_script("window.scrollTo(0, 0);")
-        person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']/button[2]")
+        person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']"
+                                                      "/div[2]/button")
         person_button.click()
         time.sleep(1)
         add_person_button = driver.find_element(By.XPATH, "//button[@class='styles_c__VNmM2 "
