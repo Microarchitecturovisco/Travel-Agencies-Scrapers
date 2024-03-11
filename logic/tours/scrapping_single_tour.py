@@ -76,67 +76,67 @@ def get_tour_city(driver: WebDriver) -> Optional[str]:
     return city
 
 
-def get_tour_catering_options(driver: WebDriver) -> List[str]:
+def get_tour_food_options(driver: WebDriver) -> List[str]:
     """
-    Get the catering options available for the tour from the webpage.
+    Get the food options available for the tour from the webpage.
 
     If there is more than one option to choose, the button is clickable (enabled)
-    and catering options are listed in a dropdown list.
+    and food options are listed in a dropdown list.
 
     Parameters:
     - driver (WebDriver): The WebDriver object.
 
     Returns:
-    - List[str]: A list of catering options available for the tour.
+    - List[str]: A list of food options available for the tour.
     """
     try:
-        catering_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
-        button_element = driver.find_element(By.XPATH, catering_options_xpath)
+        food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
+        button_element = driver.find_element(By.XPATH, food_options_xpath)
 
         if button_element.is_enabled():  # more than one option available - open dropdown list
             button_element.click()  # open dropdown list
             driver.implicitly_wait(2)
 
-            catering_options = get_catering_options_from_dropdown_list(driver)
+            food_options = get_food_options_from_dropdown_list(driver)
 
             button_element.click()  # close dropdown list
 
-            return catering_options
+            return food_options
 
         else:  # only one option available
             button_text = button_element.text
-            catering_options = button_text.split("\n")[1:]
+            food_options = button_text.split("\n")[1:]
 
-        return catering_options
+        return food_options
     except Exception as e:
-        print(f"An error occurred while getting tour catering options: {e}")
+        print(f"An error occurred while getting tour food options: {e}")
         return []
 
 
-def get_catering_options_from_dropdown_list(driver: WebDriver):
+def get_food_options_from_dropdown_list(driver: WebDriver):
     """
-    Extracts catering options from the dropdown list on the Itaka website.
+    Extracts food options from the dropdown list on the Itaka website.
 
     Parameters:
     - driver: The Selenium WebDriver instance.
 
     Returns:
-    - list: A list of catering option names extracted from the dropdown list.
+    - list: A list of food option names extracted from the dropdown list.
     """
     try:
-        # Find all elements within the catering options list
-        catering_opt_elements = driver.find_elements(By.CLASS_NAME, "styles_c__h83a9")
-        catering_options = []
-        # Iterate over each element to extract catering option names
-        for element in catering_opt_elements:
+        # Find all elements within the food options list
+        food_opt_elements = driver.find_elements(By.CLASS_NAME, "styles_c__h83a9")
+        food_options = []
+        # Iterate over each element to extract food option names
+        for element in food_opt_elements:
             try:
-                catering_opt_name = element.text.split("\n")[0]
-                catering_options.append(catering_opt_name)
+                food_opt_name = element.text.split("\n")[0]
+                food_options.append(food_opt_name)
             except Exception as e:
-                print(f"An error occurred while extracting catering option name: {e}")
-        return catering_options
+                print(f"An error occurred while extracting food option name: {e}")
+        return food_options
     except Exception as e:
-        print(f"An error occurred while getting catering options: {e}")
+        print(f"An error occurred while getting food options: {e}")
         return []
 
 
@@ -248,18 +248,18 @@ def get_room_options(driver: WebDriver):
     return rooms
 
 
-def get_airport_options(driver: WebDriver) -> List[str]:
+def get_departure_options(driver: WebDriver) -> List[str]:
     """
-    Get the airport options available for the tour from the webpage.
+    Get the departure options available for the tour from the webpage.
 
     If there is more than one option to choose, the button is clickable (enabled)
-    and airport options are listed in a dropdown list.
+    and departure options are listed in a dropdown list.
 
     Parameters:
     - driver (WebDriver): The WebDriver object.
 
     Returns:
-    - List[str]: A list of airport options available for the tour.
+    - List[str]: A list of departure options available for the tour.
     """
     try:
         button_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[5]/button"
@@ -269,85 +269,86 @@ def get_airport_options(driver: WebDriver) -> List[str]:
             button_element.click()  # open dropdown list
             time.sleep(1)
 
-            airport_cities = get_airport_options_from_dropdown_list(driver)
+            departure_cities = get_departure_options_from_dropdown_list(driver)
 
             button_element.click()  # close dropdown list
 
         else:  # only one option available
             button_value = button_element.text
-            airport_cities = button_value.split("\n")[1:]
+            departure_cities = button_value.split("\n")[1:]
 
-        return airport_cities
+        return departure_cities
     except Exception as e:
-        print(f"An error occurred while getting airport options: {e}")
+        print(f"An error occurred while getting departure options: {e}")
         return []
 
 
-def get_airport_options_from_dropdown_list(driver):
+def get_departure_options_from_dropdown_list(driver):
     """
-    Extracts airport options from the dropdown list.
+    Extracts departure options from the dropdown list.
 
     Parameters:
     - driver: WebDriver instance
 
     Returns:
-    - List[str]: List of airport cities
+    - List[str]: List of departure cities
     """
     try:
         # Select the dropdown list element
-        airport_opt_xpath = "/html/body/div[6]/div/div/div/div[1]"
-        airport_opt_element = driver.find_element(By.XPATH, airport_opt_xpath)
-        airport_cities = get_default_airport_options(airport_opt_element)
-        get_additional_airport_options(airport_cities, airport_opt_element)
-        airport_cities = [value.split('\n')[0] for value in airport_cities]  # Extract the city name
-        return airport_cities
+        departure_opt_xpath = "/html/body/div[6]/div/div/div/div[1]"
+        departure_opt_element = driver.find_element(By.XPATH, departure_opt_xpath)
+        departure_cities = get_default_departure_options(departure_opt_element)
+        get_additional_departure_options(departure_cities, departure_opt_element)
+        departure_cities = [value.split('\n')[0] for value in departure_cities]  # Extract the city name
+        return departure_cities
     except Exception as e:
         print(f"An error occurred: {e}")
         return []
 
 
-def get_additional_airport_options(airport_cities: List[str], airport_opt_element: WebElement) -> None:
+def get_additional_departure_options(departure_cities: List[str], departure_opt_element: WebElement) -> None:
     """
-    Extracts additional airport options from the given element and appends them to the list of airport cities.
+    Extracts additional departure options from the given element and appends them to the list of departure cities.
 
     Parameters:
-    - airport_cities (List[str]): The list of airport cities to which additional options will be appended.
-    - airport_opt_element (WebElement): The WebElement containing additional airport options.
+    - departure_cities (List[str]): The list of departure cities to which additional options will be appended.
+    - departure_opt_element (WebElement): The WebElement containing additional departure options.
 
     Returns:
     - None
     """
     try:
         additional_list_xpath = "./div/ul/li[@class='styles_c__h83a9']"
-        additional_airport_opt_elements = airport_opt_element.find_elements(By.XPATH, additional_list_xpath)
-        for element in additional_airport_opt_elements:
-            # Extracting the airport information
-            label_element = element.find_element(By.CLASS_NAME, "styles_c__label__q3Tzc")
-            airport_city = label_element.find_element(By.CLASS_NAME, "oui-font-size-14").text
-            airport_cities.append(airport_city)
+        additional_departure_opt_elements = departure_opt_element.find_elements(By.XPATH, additional_list_xpath)
+        if additional_departure_opt_elements:  # Check if elements were found
+            for element in additional_departure_opt_elements:
+                # Extracting the departure information
+                label_element = element.find_element(By.CLASS_NAME, "styles_c__label__q3Tzc")
+                departure_city = label_element.find_element(By.CLASS_NAME, "oui-font-size-14").text
+                departure_cities.append(departure_city)
     except Exception as e:
         print(f"An error occurred: {e}")
 
 
-def get_default_airport_options(airport_opt_element: WebElement) -> List[str]:
+def get_default_departure_options(departure_opt_element: WebElement) -> List[str]:
     """
-    Extract default airport options from the given element.
+    Extract default departure options from the given element.
 
     Parameters:
-    - airport_opt_element (WebElement): The WebElement containing default airport options.
+    - departure_opt_element (WebElement): The WebElement containing default departure options.
 
     Returns:
-    - List[str]: A list of default airport cities.
+    - List[str]: A list of default departure cities.
     """
-    airport_cities = []
+    departure_cities = []
     # Find all li elements within the ul
-    li_elements = airport_opt_element.find_elements(By.XPATH, "./ul/li")
+    li_elements = departure_opt_element.find_elements(By.XPATH, "./ul/li")
     # Iterate over each li element to extract city names
     for li_element in li_elements:
         city_name = li_element.find_element(By.XPATH, ".//span[contains(@class, 'oui-font-size-14')]").text
-        airport_cities.append(city_name)
+        departure_cities.append(city_name)
 
-    return airport_cities
+    return departure_cities
 
 
 def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
@@ -371,8 +372,8 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     if tour.city is None:
         tour.city = tour.country
     tour.photos = get_tour_photos(driver)
-    tour.airport_options = get_airport_options(driver)
-    tour.catering_options = get_tour_catering_options(driver)
+    tour.departure_options = get_departure_options(driver)
+    tour.food_options = get_tour_food_options(driver)
     rooms = get_room_options(driver)
     print("tour scrapped successfully\n")
     return tour
