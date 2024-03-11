@@ -5,7 +5,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from typing import Optional, List
 from logic.initalize_scraper import init_webdriver
-from tour_class import Tour
+from logic.tours.tour_class import Tour
 
 
 def scrape_element_by_xpath(driver: WebDriver, element_xpath: str) -> Optional[str]:
@@ -42,6 +42,16 @@ def get_tour_name(driver: WebDriver) -> Optional[str]:
         return name
     except NoSuchElementException:
         return None
+
+
+def get_tour_rating(driver: WebDriver) -> Optional[str]:
+    return scrape_element_by_xpath(driver, '(//*[@data-testid="reviews-rating"])[1]/strong')
+
+
+def get_tour_description(driver: WebDriver) -> Optional[str]:
+    description_div = driver.find_element(By.ID, "description")
+    description = description_div.find_element(By.XPATH, "./p")
+    return description.text
 
 
 def get_tour_country(driver: WebDriver) -> Optional[str]:
@@ -293,6 +303,8 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     time.sleep(3)  # wait for the page to load
 
     tour.name = get_tour_name(driver)
+    tour.rating = get_tour_rating(driver)
+    tour.description = get_tour_description(driver)
     tour.country = get_tour_country(driver)
     tour.city = get_tour_city(driver)
     if tour.city is None:
