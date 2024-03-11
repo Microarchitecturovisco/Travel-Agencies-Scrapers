@@ -14,6 +14,8 @@ class Tour:
     """
 
     name = ""
+    rating = ""
+    description = ""
     country = ""
     city = ""
     restaurant_details = ""

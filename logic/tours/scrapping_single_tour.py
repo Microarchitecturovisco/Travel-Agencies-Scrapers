@@ -46,6 +46,16 @@ def get_tour_name(driver: WebDriver) -> Optional[str]:
         return None
 
 
+def get_tour_rating(driver: WebDriver) -> Optional[str]:
+    return scrape_element_by_xpath(driver, '(//*[@data-testid="reviews-rating"])[1]/strong')
+
+
+def get_tour_description(driver: WebDriver) -> Optional[str]:
+    description_div = driver.find_element(By.ID, "description")
+    description = description_div.find_element(By.XPATH, "./p")
+    return description.text
+
+
 def get_tour_country(driver: WebDriver) -> Optional[str]:
     """
     Get the country of the tour from the webpage.
@@ -367,6 +377,8 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     driver.implicitly_wait(10)
     time.sleep(3)  # wait for the page to load
     tour.name = get_tour_name(driver)
+    tour.rating = get_tour_rating(driver)
+    tour.description = get_tour_description(driver)
     tour.country = get_tour_country(driver)
     tour.city = get_tour_city(driver)
     if tour.city is None:
