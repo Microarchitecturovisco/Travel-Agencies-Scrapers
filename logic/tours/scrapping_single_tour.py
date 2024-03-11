@@ -186,6 +186,15 @@ def get_tour_photos(driver: WebDriver) -> List[str]:
 
 
 def get_room_options(driver: WebDriver):
+    """
+    Scrape room options for different person quantity
+
+    Parameters:
+    - driver (WebDriver): The WebDriver object.
+
+    Returns:
+    - List[Room]: A list of available rooms for given url
+    """
     rooms = []
     person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']/div[2]/button")
     person_button.click()
