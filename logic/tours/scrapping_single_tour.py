@@ -203,10 +203,14 @@ def get_room_options(driver: WebDriver):
         for room in all_rooms:
             new_room = Room()
             room_name = room.find_element(By.TAG_NAME, "h6").text.strip()
-            room_button = room.find_element(By.XPATH, ".//ul/button")
-            room_button.click()
-            room_descriptions = room.find_elements(By.XPATH, ".//li/span/span[2]")
-            room_description = ',  '.join([description.text for description in room_descriptions])
+            room_description = ""
+            try:
+                room_button = room.find_element(By.XPATH, ".//ul/button")
+                room_button.click()
+                room_descriptions = room.find_elements(By.XPATH, ".//li/span/span[2]")
+                room_description = ',  '.join([description.text for description in room_descriptions])
+            except NoSuchElementException:
+                print("Room description not found")
 
             price_div = room.find_element(By.XPATH, './/*[@class="styles_price__XJaTa styles_price--with-bottom-'
                                                     'space__CFyLx"]/strong').text.strip()
@@ -222,6 +226,8 @@ def get_room_options(driver: WebDriver):
             new_room.description = room_description
             new_room.price = room_price
             new_room.capacity = room_capacity
+            print(room_name)
+            print(room_description)
             rooms.append(new_room)
 
         driver.execute_script("window.scrollTo(0, 0);")
@@ -232,6 +238,8 @@ def get_room_options(driver: WebDriver):
         add_person_button = driver.find_element(By.XPATH, "//button[@class='styles_c__VNmM2 "
                                                           "styles_c--secondary__oM3BG'][2]")
         if not add_person_button.is_enabled():
+            save_person_button = driver.find_element(By.XPATH, "//*[@class='ps-3 ms-auto']/button")
+            save_person_button.click()
             break
         add_person_button.click()
         room_capacity += 1
@@ -374,8 +382,8 @@ if __name__ == "__main__":
     driver = init_webdriver()
     # test_tour_url = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
     # test_tour_url = "https://www.itaka.pl/wczasy/kenia/twiga-beach-resort-and-spa,MBATWIG.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdNQkFUV0lHKAQ6BEwwNjBCBgiAqqmvBkoGCICfzq8GUAJiBQoDV1JPagUKA01CQXIDCgExegUKA01CQYIBBQoDV1JPigEDCgExkgEGCICqqa8GmgEGCICfzq8GogEFCgNMU1aqAQMKAUE%253D"
-    # test_tour_url = "https://www.itaka.pl/wczasy/tunezja/mahdia/hotel-thalassa-mahdia,NBETAMA.html"
-    test_tour_url = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants[0][adults]=2"
+    #test_tour_url = "https://www.itaka.pl/wczasy/tunezja/mahdia/hotel-thalassa-mahdia,NBETAMA.html"
+    test_tour_url = "https://www.itaka.pl/wczasy/hiszpania/bilbao/hotel-vincci-consulado-de-bilbao,1015174.html?id=CgVJdGFrYRIEVklURBoDUExOIgcxMDE1MTc0KAM6BEtMMjBCBgiAt%252FivBkoGCICgiLAGUAGSAQYIgLf4rwaaAQYIgKCIsAaiAQUKA0RCTKoBAwoBVQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
     test_tour = Tour(test_tour_url)
     test_tour = scrape_single_tour(driver, test_tour)
 
