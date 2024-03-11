@@ -1,3 +1,4 @@
+import re
 import time
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -6,6 +7,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from typing import Optional, List
 from logic.initalize_scraper import init_webdriver
 from logic.tours.tour_class import Tour
+from logic.tours.room_class import Room
 
 
 def scrape_element_by_xpath(driver: WebDriver, element_xpath: str) -> Optional[str]:
@@ -183,6 +185,88 @@ def get_tour_photos(driver: WebDriver) -> List[str]:
         return []
 
 
+def get_room_options(driver: WebDriver):
+    """
+    Scrape room options for different person quantity
+
+    Parameters:
+    - driver (WebDriver): The WebDriver object.
+
+    Returns:
+    - List[Room]: A list of available rooms for given url
+    """
+    rooms = []
+    person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']/div[2]/button")
+    person_button.click()
+    time.sleep(1)
+    sub_person_button = driver.find_element(By.XPATH, "//button[@class='styles_c__VNmM2 "
+                                                      "styles_c--secondary__oM3BG'][1]")
+    while sub_person_button.is_enabled():
+        sub_person_button.click()
+        time.sleep(1)
+
+    save_person_button = driver.find_element(By.XPATH, "//*[@class='ps-3 ms-auto']/button")
+    save_person_button.click()
+    room_capacity = 1
+    while True:
+        time.sleep(1)
+        try:
+            rooms_div = driver.find_element(By.NAME, "rooms")
+        except NoSuchElementException:
+            break
+
+        all_rooms = rooms_div.find_elements(By.CLASS_NAME, "styles_c__GHVYT")
+        price_div = driver.find_element(By.XPATH, '//*[@data-testid="current-price"]/span[1]').text.strip()
+        standard_price = price_div.replace(" ", "").replace("zł", "")
+
+        for room in all_rooms:
+            new_room = Room()
+            room_name = room.find_element(By.TAG_NAME, "h6").text.strip()
+            room_description = ""
+            try:
+                room_button = room.find_element(By.XPATH, ".//ul/button")
+                room_button.click()
+                room_descriptions = room.find_elements(By.XPATH, ".//li/span/span[2]")
+                room_description = ',  '.join([description.text for description in room_descriptions])
+            except NoSuchElementException:
+                print("Room description not found")
+
+            price_div = room.find_element(By.XPATH, './/*[@class="styles_price__XJaTa styles_price--with-bottom-'
+                                                    'space__CFyLx"]/strong').text.strip()
+            room_price = 0
+            if price_div == "w cenie":
+                room_price = int(standard_price)
+            else:
+                additional_price = re.findall(r'\d+', price_div)
+                additional_price = ''.join(additional_price)
+                room_price = int(standard_price) + int(additional_price)
+
+            new_room.name = room_name
+            new_room.description = room_description
+            new_room.price = room_price
+            new_room.capacity = room_capacity
+            print(room_name)
+            print(room_description)
+            rooms.append(new_room)
+
+        driver.execute_script("window.scrollTo(0, 0);")
+        person_button = driver.find_element(By.XPATH, "//*[@class='styles_c__Muqrv styles_wrapper__1Wod9']"
+                                                      "/div[2]/button")
+        person_button.click()
+        time.sleep(1)
+        add_person_button = driver.find_element(By.XPATH, "//button[@class='styles_c__VNmM2 "
+                                                          "styles_c--secondary__oM3BG'][2]")
+        if not add_person_button.is_enabled():
+            save_person_button = driver.find_element(By.XPATH, "//*[@class='ps-3 ms-auto']/button")
+            save_person_button.click()
+            break
+        add_person_button.click()
+        room_capacity += 1
+        save_person_button = driver.find_element(By.XPATH, "//*[@class='ps-3 ms-auto']/button")
+        save_person_button.click()
+    return rooms
+
+
 def get_departure_options(driver: WebDriver) -> List[str]:
     """
     Get the departure options available for the tour from the webpage.
@@ -301,7 +385,6 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     print(tour.url)
     driver.implicitly_wait(10)
     time.sleep(3)  # wait for the page to load
-
     tour.name = get_tour_name(driver)
     tour.rating = get_tour_rating(driver)
     tour.description = get_tour_description(driver)
@@ -312,6 +395,7 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     tour.photos = get_tour_photos(driver)
     tour.departure_options = get_departure_options(driver)
     tour.food_options = get_tour_food_options(driver)
+    rooms = get_room_options(driver)
     print("tour scrapped successfully\n")
     return tour
 
@@ -320,10 +404,8 @@ if __name__ == "__main__":
     driver = init_webdriver()
     # test_tour_url = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
     # test_tour_url = "https://www.itaka.pl/wczasy/kenia/twiga-beach-resort-and-spa,MBATWIG.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdNQkFUV0lHKAQ6BEwwNjBCBgiAqqmvBkoGCICfzq8GUAJiBQoDV1JPagUKA01CQXIDCgExegUKA01CQYIBBQoDV1JPigEDCgExkgEGCICqqa8GmgEGCICfzq8GogEFCgNMU1aqAQMKAUE%253D"
-    # test_tour_url = "https://www.itaka.pl/wczasy/tunezja/mahdia/hotel-thalassa-mahdia,NBETAMA.html"
-    # test_tour_url = "https://www.itaka.pl/wycieczki/slowenia/male-jest-piekne,XSOMALE.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdYU09NQUxFKAY6BEwwNjdCBgiAueywBkoGCIDohrEGUANaCQoHWFNPTUFMRWIFCgNHVUJqBQoDWFNPegUKA1hTT4IBBQoDR1VCkgEGCIDc8bAGmgEGCIDFgbEGogEFCgNEQkyqAQMKAUY%253D&participants%5B0%5D%5Badults%5D=2"
+    #test_tour_url = "https://www.itaka.pl/wczasy/tunezja/mahdia/hotel-thalassa-mahdia,NBETAMA.html"
     test_tour_url = "https://www.itaka.pl/wczasy/hiszpania/bilbao/hotel-vincci-consulado-de-bilbao,1015174.html?id=CgVJdGFrYRIEVklURBoDUExOIgcxMDE1MTc0KAM6BEtMMjBCBgiAt%252FivBkoGCICgiLAGUAGSAQYIgLf4rwaaAQYIgKCIsAaiAQUKA0RCTKoBAwoBVQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
-    # test_tour_url = "https://www.itaka.pl/wczasy/egipt/marsa-alam/hotel-lazuli,RMFLAZU.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdSTUZMQVpVKAQ6BEwwNjdCBgiA%252FMivBkoGCIDx7a8GUAJiBQoDS1RXagUKA1JNRnIDCgEzegUKA1JNRoIBBQoDS1RXigEDCgEzkgEGCID8yK8GmgEGCIDx7a8GogEFCgNEQkyqAQMKAUE%253D&participants%5B0%5D%5Badults%5D=2"
     test_tour = Tour(test_tour_url)
     test_tour = scrape_single_tour(driver, test_tour)
 

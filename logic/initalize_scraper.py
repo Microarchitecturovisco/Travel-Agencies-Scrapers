@@ -21,6 +21,7 @@ def init_webdriver(webdriver_type: str = 'chrome'):
     driver = webdriver.Chrome() if webdriver_type == 'chrome' else webdriver.Firefox() if webdriver_type == 'firefox' else webdriver.Chrome()
     # Navigate to the website
     driver.get("https://www.itaka.pl/")
+    driver.maximize_window()
     driver.implicitly_wait(2)
 
     accept_cookies_button(driver)
