@@ -100,8 +100,9 @@ def get_tour_food_options(driver: WebDriver) -> List[str]:
     - List[str]: A list of food options available for the tour.
     """
     try:
-        food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
-        button_element = driver.find_element(By.XPATH, food_options_xpath)
+        button_element = (driver
+                          .find_element(By.CLASS_NAME, 'styles_c__content__qjLts')
+                          .find_elements(By.CLASS_NAME, 'styles_c__ERhXC'))[3]
 
         if button_element.is_enabled():  # more than one option available - open dropdown list
             button_element.click()  # open dropdown list
@@ -231,8 +232,7 @@ def get_room_options(driver: WebDriver):
             except NoSuchElementException:
                 print("Room description not found")
 
-            price_div = room.find_element(By.XPATH, './/*[@class="styles_price__XJaTa styles_price--with-bottom-'
-                                                    'space__CFyLx"]/strong').text.strip()
+            price_div = room.find_element(By.CLASS_NAME, 'styles_price--with-bottom-space__CFyLx').text.strip()
             room_price = 0
             if price_div == "w cenie":
                 room_price = int(standard_price)
@@ -281,8 +281,9 @@ def get_departure_options(driver: WebDriver) -> List[str]:
     - List[str]: A list of departure options available for the tour.
     """
     try:
-        button_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[5]/button"
-        button_element = driver.find_element(By.XPATH, button_xpath)
+        button_element = (driver
+                          .find_element(By.CLASS_NAME, 'styles_c__content__qjLts')
+                          .find_elements(By.CLASS_NAME, 'styles_c__ERhXC'))[4]
 
         if button_element.is_enabled():  # more than one option available - open dropdown list
             button_element.click()  # open dropdown list
@@ -395,8 +396,7 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     tour.photos = get_tour_photos(driver)
     tour.departure_options = get_departure_options(driver)
     tour.food_options = get_tour_food_options(driver)
-    rooms = get_room_options(driver)
-    print("tour scrapped successfully\n")
+    tour.rooms = get_room_options(driver)
     return tour
 
 
