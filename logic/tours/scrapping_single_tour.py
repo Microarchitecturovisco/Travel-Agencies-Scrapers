@@ -296,7 +296,6 @@ def get_departure_options(driver: WebDriver) -> List[str]:
              .find_element(By.CLASS_NAME, 'styles_c__qq79Q')
              .find_element(By.CLASS_NAME, 'styles_c--fullWidth__S4Bvm')
              .click())
-            # button_element.click()  # close dropdown list
 
         else:  # only one option available
             button_value = button_element.text
