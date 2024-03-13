@@ -43,14 +43,9 @@ def save_dataframe(tours: List[Tour]):
 
 
 if __name__ == "__main__":
-    driver = init_webdriver('firefox')
+    driver = init_webdriver()
 
-    tours_urls = scrape_all_inclusive_tours(driver)
-
-    tours_result = []
-
-    for tour in tours_urls:
-        tours_result.append(scrape_single_tour(driver, tour))
+    tours_result = [scrape_single_tour(driver, tour) for tour in scrape_all_inclusive_tours(driver)]
 
     save_dataframe(tours_result)
 
