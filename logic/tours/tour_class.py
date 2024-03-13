@@ -21,7 +21,9 @@ class Tour:
     restaurant_details = ""
     food_options = []
     photos = []
+    departure_options = []
     airport_options = []
+    rooms = []
 
     def __init__(self, url: str):
         """

@@ -100,8 +100,9 @@ def get_tour_food_options(driver: WebDriver) -> List[str]:
     - List[str]: A list of food options available for the tour.
     """
     try:
-        food_options_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[4]/button"
-        button_element = driver.find_element(By.XPATH, food_options_xpath)
+        button_element = (driver
+                          .find_element(By.CLASS_NAME, 'styles_c__content__qjLts')
+                          .find_elements(By.CLASS_NAME, 'styles_c__ERhXC'))[3]
 
         if button_element.is_enabled():  # more than one option available - open dropdown list
             button_element.click()  # open dropdown list
@@ -231,8 +232,7 @@ def get_room_options(driver: WebDriver):
             except NoSuchElementException:
                 print("Room description not found")
 
-            price_div = room.find_element(By.XPATH, './/*[@class="styles_price__XJaTa styles_price--with-bottom-'
-                                                    'space__CFyLx"]/strong').text.strip()
+            price_div = room.find_element(By.CLASS_NAME, 'styles_price--with-bottom-space__CFyLx').text.strip()
             room_price = 0
             if price_div == "w cenie":
                 room_price = int(standard_price)
@@ -281,8 +281,9 @@ def get_departure_options(driver: WebDriver) -> List[str]:
     - List[str]: A list of departure options available for the tour.
     """
     try:
-        button_xpath = "/html/body/div[5]/div[4]/div[2]/div/div[1]/div[3]/div[2]/div/div/div[3]/div[5]/button"
-        button_element = driver.find_element(By.XPATH, button_xpath)
+        button_element = (driver
+                          .find_element(By.CLASS_NAME, 'styles_c__content__qjLts')
+                          .find_elements(By.CLASS_NAME, 'styles_c__ERhXC'))[4]
 
         if button_element.is_enabled():  # more than one option available - open dropdown list
             button_element.click()  # open dropdown list
@@ -290,7 +291,11 @@ def get_departure_options(driver: WebDriver) -> List[str]:
 
             departure_cities = get_departure_options_from_dropdown_list(driver)
 
-            button_element.click()  # close dropdown list
+            # close dropdown list
+            (driver
+             .find_element(By.CLASS_NAME, 'styles_c__qq79Q')
+             .find_element(By.CLASS_NAME, 'styles_c--fullWidth__S4Bvm')
+             .click())
 
         else:  # only one option available
             button_value = button_element.text
@@ -395,8 +400,7 @@ def scrape_single_tour(driver: WebDriver, tour: Tour) -> Tour:
     tour.photos = get_tour_photos(driver)
     tour.departure_options = get_departure_options(driver)
     tour.food_options = get_tour_food_options(driver)
-    rooms = get_room_options(driver)
-    print("tour scrapped successfully\n")
+    tour.rooms = get_room_options(driver)
     return tour
 
 
@@ -404,7 +408,7 @@ if __name__ == "__main__":
     driver = init_webdriver()
     # test_tour_url = "https://www.itaka.pl/wczasy/zjednoczone-emiraty-arabskie/abu-dhabi/hotel-khalidiya-palace-rayhaan-by-rotana,AAEAUH1WKO.html?id=CgVJdGFrYRIEVklUWBoDUExOIgpBQUVBVUgxV0tPKAQ6BEtMMjBCBgiAkeizBkoGCICd%252FbMGUAJiBQoDS1JLagUKA0FVSHIICgZEUDMwMDh6BQoDQVVIggEFCgNLUkuKAQgKBkRQMzAwOJIBBgiAkeizBpoBBgiAnf2zBqIBDAoKUk1TRDAwMDBCMKoBAwoBQQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
     # test_tour_url = "https://www.itaka.pl/wczasy/kenia/twiga-beach-resort-and-spa,MBATWIG.html?id=CgVJdGFrYRIEVklUWBoDUExOIgdNQkFUV0lHKAQ6BEwwNjBCBgiAqqmvBkoGCICfzq8GUAJiBQoDV1JPagUKA01CQXIDCgExegUKA01CQYIBBQoDV1JPigEDCgExkgEGCICqqa8GmgEGCICfzq8GogEFCgNMU1aqAQMKAUE%253D"
-    #test_tour_url = "https://www.itaka.pl/wczasy/tunezja/mahdia/hotel-thalassa-mahdia,NBETAMA.html"
+    # test_tour_url = "https://www.itaka.pl/wczasy/tunezja/mahdia/hotel-thalassa-mahdia,NBETAMA.html"
     test_tour_url = "https://www.itaka.pl/wczasy/hiszpania/bilbao/hotel-vincci-consulado-de-bilbao,1015174.html?id=CgVJdGFrYRIEVklURBoDUExOIgcxMDE1MTc0KAM6BEtMMjBCBgiAt%252FivBkoGCICgiLAGUAGSAQYIgLf4rwaaAQYIgKCIsAaiAQUKA0RCTKoBAwoBVQ%253D%253D&participants%5B0%5D%5Badults%5D=2"
     test_tour = Tour(test_tour_url)
     test_tour = scrape_single_tour(driver, test_tour)
